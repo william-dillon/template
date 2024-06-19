@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"slices"
 	"sort"
 	"strings"
@@ -68,6 +69,14 @@ type CSV struct {
 	*FILE
 	header CSV_HEADER
 	rows   [][]string
+}
+
+func NewCSVFromFile(filename string) (*CSV, error) {
+	f, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("error reading %s: %w", filename, err)
+	}
+	return NewCSV(filename, "text/csv", f)
 }
 
 func NewCSV(name, mimetype string, b []byte) (*CSV, error) {
@@ -200,6 +209,18 @@ func AdaptTemplateToCSV(csv *CSV, raw_template *FILE) ([]byte, error) {
 		}
 		results.WriteString(fmt.Sprintf(" index . %d }}", i))
 	}
+}
+
+func NewTemplateFromFile(csvfilename, templatefilename string) (*Template, error) {
+	csv, err := NewCSVFromFile(csvfilename)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing csv: %w", err)
+	}
+	f, err := os.ReadFile(templatefilename)
+	if err != nil {
+		return nil, fmt.Errorf("error reading template file %s: %w", templatefilename, err)
+	}
+	return NewTemplate(templatefilename, "text/plain", f, csv)
 }
 
 func NewTemplate(name, mimetype string, b []byte, csv *CSV) (*Template, error) {
