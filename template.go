@@ -48,6 +48,8 @@ type CSV_HEADER struct {
 	sorted_header []header_field
 }
 
+func (c *CSV) Header() CSV_HEADER { return c.header }
+
 func (c *CSV_HEADER) Len() int { return len(c.header) }
 
 func (c *CSV_HEADER) FindKeyIndex(key string) int {
@@ -117,6 +119,8 @@ type Template struct {
 	adapted_template     *template.Template
 	position             int
 }
+
+func (t *Template) CSV() *CSV { return t.csv }
 
 func (t *Template) Next() (templateoutput []byte, csvrow []string, err error) {
 	index := t.position
